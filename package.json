@@ -1,0 +1,25 @@
+{
+  "name": "visual_sol_play",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "antlr": "antlr4ts -visitor antlr/Solidity.g4 -o src/parser",
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "display": "ts-node src/client-portrait/display/simple-server.ts"
+  },
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "diff": "^5.2.0"
+  },
+  "devDependencies": {
+    "@types/diff": "^5.0.9",
+    "@types/node": "^20.11.19",
+    "antlr4": "^4.9.2",
+    "antlr4ts-cli": "^0.5.0-alpha.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
