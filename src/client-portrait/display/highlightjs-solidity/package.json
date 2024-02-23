@@ -1,0 +1,28 @@
+{
+    "name": "highlightjs-solidity",
+    "version": "0.0.1",
+    "description": "highlight.js syntax definition for Ethereum's Solidity language",
+    "main": "src/index.js",
+    "files": [
+        "dist",
+        "src"
+    ],
+    "keywords": [
+        "Solidity",
+        "Ethereum",
+        "highlight.js",
+        "highlightjs",
+        "syntax"
+    ],
+    "scripts": {
+      "build": "webpack"
+    },
+    "author": "m1n337",
+    "license": "MIT",
+    "devDependencies": {
+        "highlight.js": "^11.9.0",
+        "terser-webpack-plugin": "^5.3.10",
+        "webpack": "^5.90.3",
+        "webpack-cli": "^5.1.4"
+    }
+}

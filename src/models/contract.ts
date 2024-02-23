@@ -106,12 +106,14 @@ export class Contract extends Base {
         for(const contract of baseContractsLinearization){
             for(const [sig, func] of contract.functionSignaturesTable.entries()){
                 const _funcList = this.#functionSignaturesTable.get(sig);
-                if (_funcList) {
-                    this.#functionSignaturesTable.set(sig, _funcList.concat(func));
-                }
+                this.#functionSignaturesTable.set(sig, (_funcList || []).concat([...func]));
+                
+                // console.log(`[UPDATE] sig = ${sig} => funcs = ${_funcList?.map(item => `${item.contract.name}:${item.signature}`)} => add ${func.map(item => `${item.contract.name}:${item.signature}`)}`)
             }
 
-            contract.build();
+            if(contract.#alreadBuilt){
+                break;
+            }
         }
         
         this.#baseContractsLinearization = [this, ...baseContractsLinearization];
