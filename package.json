@@ -1,9 +1,17 @@
 {
-  "name": "visual_sol_play",
+  "name": "autidor-notebook",
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "MIT",
   "type": "commonjs",
+  "author": {
+    "name": "M1ner",
+    "email": "m1n337b@gmail.com",
+    "url": "https://github.com/m1n337"
+  },
+  "bin": {
+    "audotnb": "src/index.ts"
+  },
   "scripts": {
     "antlr": "antlr4ts -visitor antlr/Solidity.g4 -o src/parser",
     "build": "tsc",
@@ -11,7 +19,9 @@
     "display": "ts-node src/client-portrait/display/simple-server.ts"
   },
   "dependencies": {
+    "@commander-js/extra-typings": "^12.0.0",
     "antlr4ts": "^0.5.0-alpha.4",
+    "commander": "^12.0.0",
     "diff": "^5.2.0"
   },
   "devDependencies": {

@@ -1,11 +1,3 @@
-import { ClientPortrait } from "./client-portrait";
+export {DEFAULT_EXCLUDE_FILE, DEFAULT_EXCLUDE_DIR} from './constants';
 
-const excludeKeyWords = [
-  "Mock",
-  "Test"
-];
-
-const excludeDirs = [
-  "interfaces",
-  "mocks"
-];
+export { ClientPortrait } from "./client-portrait";

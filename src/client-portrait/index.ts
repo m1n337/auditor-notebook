@@ -7,6 +7,7 @@ import { FunctionBase } from "../models/function.ts";
 
 import { Contract } from "../models/contract";
 import { readDirectory } from "./utils.ts";
+import { DEFAULT_EXCLUDE_DIR, DEFAULT_EXCLUDE_FILE } from "../constants/index.ts";
 
 interface ClientPortraitConfigParams {
     excludeDirs?: string[];
@@ -32,8 +33,8 @@ export class ClientPortrait {
 
     // *** Configuration ***:
     // filters: DirName, FileName, ContractName...
-    #excludeDirs: string[] = [];
-    #excludeFiles: string[] = [];
+    #excludeDirs: string[] = DEFAULT_EXCLUDE_DIR;
+    #excludeFiles: string[] = DEFAULT_EXCLUDE_FILE;
     #excludeContracts: string[] = [];
 
     // Parser control: TODO (grouped by features)
