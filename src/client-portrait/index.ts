@@ -1,13 +1,14 @@
 import * as parser from "../parser";
 
 
-import { ASTNode, ASTVisitor, ContractDefinition, FunctionCall, FunctionDefinition, Identifier } from "../parser/ast-types";
+import { ASTNode, ASTVisitor, ContractDefinition, Expression, FunctionCall, FunctionDefinition, Identifier } from "../parser/ast-types";
 
-import { FunctionBase } from "../models/function.ts";
+import { Function } from "../models/function.ts";
 
 import { Contract } from "../models/contract";
 import { readDirectory } from "./utils.ts";
 import { DEFAULT_EXCLUDE_DIR, DEFAULT_EXCLUDE_FILE } from "../constants/index.ts";
+import { getFunctionName, getFunctionSignature } from "./parser-helper.ts";
 
 interface ClientPortraitConfigParams {
     excludeDirs?: string[];
@@ -74,12 +75,12 @@ export class ClientPortrait {
             } 
             
             // prepare current build context:
-            this.currentSourceCode = sourceLines;
+            this.#currentSourceCode = sourceLines;
 
             this.build(ast)
         }
 
-        this.contractTable.forEach(contract => {
+        this.#contractTable.forEach(contract => {
             console.log("[LOG] Build contract: ", contract.name);
             contract.build();
         });
@@ -100,51 +101,23 @@ export class ClientPortrait {
     }
 
     // BUILD:
-    private contractTable: Map<string, Contract> = new Map();
+    #contractTable: Map<string, Contract> = new Map();
 
     private getOrCreateNewContract = (name: string) => {
-        let contract = this.contractTable.get(name);
+        let contract = this.#contractTable.get(name);
         if (!contract){
             contract = new Contract(name);
     
-            this.contractTable.set(name, contract);
+            this.#contractTable.set(name, contract);
         }
     
         return contract;
     }
 
-    private getFunctionName = (f: FunctionDefinition): string => {
-        let funcName = f.name;
-        if (!f.name) {
-          if (f.isConstructor) funcName = "constructor";
-          else if (f.isFallback) funcName = "fallback";
-        }
-      
-        return funcName as string;
-      }
-      
-    private getFunctionSignature = (f: FunctionDefinition) => {
-        const functionName = this.getFunctionName(f);
-        let content: string[] = [];
-        f.parameters.forEach(p => {
-          if (p.typeName && p.type === "VariableDeclaration") {
-            if (p.typeName.type == "ElementaryTypeName") {
-              content.push(p.typeName.name);
-            } else if (p.typeName.type == "ArrayTypeName") {
-              if (p.typeName.baseTypeName.type == "ElementaryTypeName") {
-                content.push(`${p.typeName.baseTypeName.name}[]`)
-              }
-            }
-          }
-        })
-      
-        return `${functionName}(${content.join(',')})`;
-    }
-
     // Build Context:
-    private currentSourceCode: string[] = [];
-    private currentContract?: Contract;
-    private currentFunction?: FunctionBase;
+    #currentSourceCode: string[] = [];
+    #currentContract?: Contract;
+    #currentFunction?: Function;
 
     private build(ast: unknown) {
 
@@ -226,16 +199,16 @@ export class ClientPortrait {
       
               const contractName = node.name;
       
-              this.currentContract = this.getOrCreateNewContract(contractName)
+              this.#currentContract = this.getOrCreateNewContract(contractName)
       
-              this.currentContract.addLoc(
+              this.#currentContract.addLoc(
                 node.loc?.start.line as number, 
                 node.loc?.start.column as number,
                 node.loc?.end.line as number,
                 node.loc?.end.column as number
               );
       
-              this.currentContract.attachFile(this.currentSourceCode);
+              this.#currentContract.attachFile(this.#currentSourceCode);
       
               node.baseContracts.forEach(baseContract => {
                 const baseContractName = baseContract.baseName.namePath;
@@ -244,19 +217,19 @@ export class ClientPortrait {
                 
                 // console.log(`> add base contract: ${currentContract?.name} -> ${tmp.name}`);
 
-                this.currentContract!.addBaseContract(tmp);
+                this.#currentContract!.addBaseContract(tmp);
               })
             },
-            FunctionDefinition: (node) => {
+            FunctionDefinition: (node: FunctionDefinition) => {
               if (this.#disableFunctionDefinition) return;
               if (this.#debugMode) {
                   console.log(`------------------------------- FunctionDefinition:enter ----------------------------------`)
                   console.log(JSON.stringify(node));
               } 
               
-              const functionName = this.getFunctionName(node);
+              const functionName = getFunctionName(node);
               
-              const func = new FunctionBase(functionName, this.getFunctionSignature(node))
+              const func = new Function(functionName, getFunctionSignature(node))
                 .setIsVirtual(node.isVirtual)
                 .setIsReceiveEther(node.isReceiveEther)
                 .setIsOverride(node.override !== null)
@@ -271,12 +244,12 @@ export class ClientPortrait {
                   node.loc?.end.column as number
               );
       
-              func.attachFile(this.currentSourceCode);
+              func.attachFile(this.#currentSourceCode);
               
               // TODO: handle FileLevelFunctions
-              this.currentContract?.addFunction(func);
+              this.#currentContract?.addFunction(func);
       
-              this.currentFunction = func;
+              this.#currentFunction = func;
 
             //   findFile.set(func.id, currentFileData);
               // currentFunction = node;
@@ -284,6 +257,9 @@ export class ClientPortrait {
               
               // contract2Functions.set(currentContract.name, (contract2Functions.get(currentContract.name) || []).concat(funcName as string));
             },
+            ModifierDefinition: (node) => 
+              this.#currentFunction
+            ,
             // ExpressionStatement: function(node) {
             //   if (!enableFunction) return;
               
@@ -302,7 +278,7 @@ export class ClientPortrait {
 
     // Public functions:
     public get singltonContracts(){
-        return Array.from(this.contractTable.values()).filter(contract => contract.isSingleton)
+        return Array.from(this.#contractTable.values()).filter(contract => contract.isSingleton)
     };
 
 }

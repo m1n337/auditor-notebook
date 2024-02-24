@@ -1,5 +1,6 @@
 import { Base } from "./base";
 import { Contract } from "./contract";
+import { Parameter } from "./parameter";
 
 export enum StateMutabilityType {
     NONE,
@@ -9,26 +10,27 @@ export enum StateMutabilityType {
 
 export enum VisibilityType {
     NONE,
-    DEFAULT,
     PRIVATE,
     INTERNAL,
     EXTERNAL,
     PUBLIC,
 }
 
-export class FunctionBase extends Base {
+export class Function extends Base {
     name: string;
     signature: string;
 
     contract!: Contract;
 
-    #isVirtual: Boolean;
+    #isVirtual: Boolean = false;
     
     // TODO: is that same with payable?
-    #isReceiveEther: Boolean;
-    #isOverride: Boolean;
-    #stateMutability: StateMutabilityType;
+    #isReceiveEther: Boolean = false;
+    #isOverride: Boolean = false;
+    #stateMutability: StateMutabilityType = StateMutabilityType.NONE;
     #visibility!: VisibilityType;
+
+    #parameters: Parameter[] = [];
 
     constructor(
         name: string,
@@ -38,11 +40,6 @@ export class FunctionBase extends Base {
 
         this.name = name;
         this.signature = sig;
-
-        this.#isVirtual = false;
-        this.#isReceiveEther = false;
-        this.#isOverride = false;
-        this.#stateMutability = StateMutabilityType.NONE;
     }
 
     public withContract(c: Contract) {
@@ -71,6 +68,8 @@ export class FunctionBase extends Base {
             this.#stateMutability = StateMutabilityType.VIEW;
         } else if (s === "pure") {
             this.#stateMutability = StateMutabilityType.PURE;
+        } else {
+            throw Error(`not support state mutability: ${s}`);
         }
 
         return this;
@@ -83,10 +82,8 @@ export class FunctionBase extends Base {
             this.#visibility = VisibilityType.PRIVATE;
         } else if (v === "external") {
             this.#visibility = VisibilityType.EXTERNAL;
-        } else if (v === "public") {
+        } else if (v === "public" || v === "default") {
             this.#visibility = VisibilityType.PUBLIC;
-        } else if (v === "default") {
-            this.#visibility = VisibilityType.DEFAULT;
         } else {
             this.#visibility = VisibilityType.NONE;
         }

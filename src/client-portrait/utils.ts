@@ -23,4 +23,4 @@ export const readDirectory = (dir: string, excludeDirs: string[], excludeFiles: 
     });
   
     return res;
-  }
+}

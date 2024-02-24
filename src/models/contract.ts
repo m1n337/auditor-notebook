@@ -1,5 +1,5 @@
 import { Base } from "./base";
-import {FunctionBase, VisibilityType} from "./function";
+import {Function, VisibilityType} from "./function";
 
 export class Contract extends Base {
     name: string;
@@ -7,13 +7,13 @@ export class Contract extends Base {
     #baseContracts: Contract[];
     #baseContractsLinearization: Contract[] | undefined;
     
-    #functionTable: Map<number, FunctionBase>;
+    #functionTable: Map<number, Function>;
     #selfFunctionIds: number[];
     #selfExternalFunctionIds: number[];
     #selfInternalFunctionIds: number[];
     #allFunctionIds: number[];
 
-    #functionSignaturesTable: Map<string, FunctionBase[]>;
+    #functionSignaturesTable: Map<string, Function[]>;
 
     #notSingleton!: boolean;
 
@@ -69,7 +69,7 @@ export class Contract extends Base {
         return this.#baseContractsLinearization;
     }
 
-    public addFunction(func: FunctionBase) {
+    public addFunction(func: Function) {
         func.withContract(this);
 
         const funcId = func.id;
