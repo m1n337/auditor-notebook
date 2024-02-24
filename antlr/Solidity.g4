@@ -129,7 +129,7 @@ enumValue
   : identifier ;
 
 enumDefinition
-  : 'enum' identifier '{' enumValue? (',' enumValue)* '}' ;
+  : 'enum' identifier '{' enumValue? (',' comment? enumValue)* '}' ;
 
 parameterList
   : '(' ( comment? parameter (',' comment? parameter)* )? ')' ;
