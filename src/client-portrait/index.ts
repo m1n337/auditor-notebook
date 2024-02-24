@@ -28,35 +28,35 @@ interface ClientPortraitConstrucotr {
 export class ClientPortrait {
     
     // file path to the contents.
-    private fileTable: Map<string, string[]> = new Map();
+    #fileTable: Map<string, string[]> = new Map();
 
     // *** Configuration ***:
     // filters: DirName, FileName, ContractName...
-    private excludeDirs: string[] = [];
-    private excludeFiles: string[] = [];
-    private excludeContracts: string[] = [];
+    #excludeDirs: string[] = [];
+    #excludeFiles: string[] = [];
+    #excludeContracts: string[] = [];
 
     // Parser control: TODO (grouped by features)
-    private disableContractDefinition: boolean = false;
-    private disableFunctionDefinition: boolean = false;
-    private disableComment: boolean = true;
+    #disableContractDefinition: boolean = false;
+    #disableFunctionDefinition: boolean = false;
+    #disableComment: boolean = true;
 
-    private debugMode: boolean = false;
+    #debugMode: boolean = false;
 
     constructor(input: string | Map<string, string>, params?: ClientPortraitConfigParams) {
         
         if(params) {
             if(params.excludeDirs) 
-                this.excludeDirs = params.excludeDirs;
+                this.#excludeDirs = params.excludeDirs;
             if(params.excludeFiles)
-                this.excludeFiles = params.excludeFiles;
+                this.#excludeFiles = params.excludeFiles;
             if(params.excludeContracts)
-                this.excludeContracts = params.excludeContracts;
+                this.#excludeContracts = params.excludeContracts;
         }
 
         let data = undefined; 
         if (typeof input === "string") {
-            data = readDirectory(input, this.excludeDirs, this.excludeFiles)
+            data = readDirectory(input, this.#excludeDirs, this.#excludeFiles)
         } else {
             data = input as Map<string, string>;
         }
@@ -64,10 +64,10 @@ export class ClientPortrait {
         for(const [path, source] of data!.entries()) {
             const sourceLines = source.split(/\r?\n/);
             
-            if(this.fileTable.get(path)) continue;
-            this.fileTable.set(path, sourceLines);
+            if(this.#fileTable.get(path)) continue;
+            this.#fileTable.set(path, sourceLines);
 
-            const ast = this.parse(source);
+            const ast = this.parse(source, path);
             if (!ast || ast.errors) {
                 continue
             } 
@@ -84,7 +84,7 @@ export class ClientPortrait {
         });
     }    
 
-    private parse(data: string) {
+    private parse(data: string, path: string) {
         try {
             const ast = parser.parse(data, {
               tokens: true,
@@ -93,7 +93,7 @@ export class ClientPortrait {
             return ast;
         } catch (e) {
             if (e instanceof parser.ParserError) {
-              console.error(e.errors)
+              console.error(`Failed to parse ${path}: `, e.errors)
             }
         }
     }
@@ -149,8 +149,8 @@ export class ClientPortrait {
 
         parser.visit(ast, {
             Comment: (node, parent) => {
-              if (this.disableComment) return;
-              if (this.debugMode) {
+              if (this.#disableComment) return;
+              if (this.#debugMode) {
                   console.log(`------------------------------- Comment:enter ----------------------------------`)
                   console.log(node)
               }
@@ -217,8 +217,8 @@ export class ClientPortrait {
             //   commentsMp.get(target).push(node);
             },
             ContractDefinition: (node) => {
-              if (this.disableContractDefinition) return;
-              if (this.debugMode) {
+              if (this.#disableContractDefinition) return;
+              if (this.#debugMode) {
                   console.log(`------------------------------- ContractDefinition:enter ----------------------------------`)
                   console.log(JSON.stringify(node));
               }
@@ -247,8 +247,8 @@ export class ClientPortrait {
               })
             },
             FunctionDefinition: (node) => {
-              if (this.disableFunctionDefinition) return;
-              if (this.debugMode) {
+              if (this.#disableFunctionDefinition) return;
+              if (this.#debugMode) {
                   console.log(`------------------------------- FunctionDefinition:enter ----------------------------------`)
                   console.log(JSON.stringify(node));
               } 

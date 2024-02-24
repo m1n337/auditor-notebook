@@ -222,6 +222,23 @@
             
                     </code>
        </pre>
+       <pre>
+        <code class="language-solidity">
+            /*** Safe Token ***/
+            
+            /**
+             * @notice Gets balance of this contract in terms of the underlying
+             * @dev This excludes the value of the current message, if any
+             * @return The quantity of underlying tokens owned by this contract
+             */
+            function getCashPrior() internal view returns (uint) {
+                PotLike pot = PotLike(potAddress);
+                uint pie = pot.pie(address(this));
+                return mul(pot.chi(), pie) / RAY;
+            }
+        
+        </code>
+       </pre>
     </div>
   </body>
 </html>

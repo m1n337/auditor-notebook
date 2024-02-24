@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/default.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css"
+    />
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.2.0/diff.min.js"></script>
+    <script type="text/javascript" src="highlightjs-solidity/dist/solidity.min.js"></script>
+  </head>
+
+  <script>
+  const sigs = {{sigs}};
+  const inheritanceChain = {{inheritanceChain}};
+  const diffObjs = {{diffObjs}};
+
+  window.addEventListener('DOMContentLoaded', (event) => {
+      
+      diffObjs.forEach((diffStrings, diffIndex) => {
+          const titleElement = document.createElement('div');
+          const sigElement = document.createElement('h2');
+          sigElement.textContent = '🚩 ' + sigs[diffIndex]; 
+          sigElement.style.cssText = "color: navy; font-weight: bold;";
+          titleElement.appendChild(sigElement);
+          const chainElement = document.createElement('p');
+          chainElement.textContent = inheritanceChain[diffIndex];
+          chainElement.style.cssText = "font-weight: bold;";
+          titleElement.appendChild(chainElement);
+          document.body.appendChild(titleElement);
+    
+          diffStrings.forEach((diffString, stringIndex) => {
+              const diffElement = document.createElement('div');
+              diffElement.id = `diffElement${diffIndex}_${stringIndex}`;
+              document.body.appendChild(diffElement);
+
+              const configuration = {
+                  drawFileList: false,
+                  fileListToggle: false,
+                  fileListStartVisible: false,
+                  stickyFileHeaders: false,
+                  fileContentToggle: true,
+                  matching: 'words',
+                  diffStyle: 'char',
+                  outputFormat: 'side-by-side',
+                  synchronisedScroll: true,
+                  highlightLanguages: {"sol": "solidity"},
+                  renderNothingWhenEmpty: false,
+              };
+
+              const diff2htmlUi = new Diff2HtmlUI(diffElement, diffString, configuration);
+              diff2htmlUi.draw();
+              
+              diff2htmlUi.hljs.registerLanguage("solidity", window.solidity);
+              diff2htmlUi.hljs.highlightAll();
+
+              diff2htmlUi.highlightCode();
+          });
+          if (diffIndex < diffObjs.length - 1) {
+            const separator = document.createElement('hr');
+            separator.style.cssText = "height:2px;border-width:0;color:gray;background-color:gray";
+            document.body.appendChild(separator);
+        }
+      });
+  });
+  </script>
+  
+  <body>
+    <div id="myDiffElement"></div>
+  </body>
+</html>

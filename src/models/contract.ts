@@ -49,11 +49,11 @@ export class Contract extends Base {
         return !this.#notSingleton;
     }
 
-    addBaseContract(contract: Contract) {
+    public addBaseContract(contract: Contract) {
         this.#baseContracts.push(contract);
     }
 
-    hasBaseContract() {
+    public hasBaseContract() {
         return this.#baseContracts.length !== 0;
     }
 
@@ -69,7 +69,7 @@ export class Contract extends Base {
         return this.#baseContractsLinearization;
     }
 
-    addFunction(func: FunctionBase) {
+    public addFunction(func: FunctionBase) {
         func.withContract(this);
 
         const funcId = func.id;
