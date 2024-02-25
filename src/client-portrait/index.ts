@@ -11,8 +11,11 @@ import { DEFAULT_EXCLUDE_DIR, DEFAULT_EXCLUDE_FILE } from "../constants/index.ts
 import { getFunctionName, getFunctionSignature } from "./parser-helper.ts";
 
 interface ClientPortraitConfigParams {
+    includeDirs?: string[];
     excludeDirs?: string[];
+    includeFiles?: string[];
     excludeFiles?: string[];
+    includeContracts?: string[];
     excludeContracts?: string[];
 
     disableContractDefinition?: boolean;
@@ -34,9 +37,12 @@ export class ClientPortrait {
 
     // *** Configuration ***:
     // filters: DirName, FileName, ContractName...
+    #includeDirs: string[] = [];
     #excludeDirs: string[] = DEFAULT_EXCLUDE_DIR;
+    #includeFiles: string[] = [];
     #excludeFiles: string[] = DEFAULT_EXCLUDE_FILE;
     #excludeContracts: string[] = [];
+    #includeContracts: string[] = [];
 
     // Parser control: TODO (grouped by features)
     #disableContractDefinition: boolean = false;
@@ -48,12 +54,23 @@ export class ClientPortrait {
     constructor(input: string | Map<string, string>, params?: ClientPortraitConfigParams) {
         
         if(params) {
-            if(params.excludeDirs) 
+            if(params.includeDirs) {
+                this.#includeDirs = params.includeDirs;
+            } else if(params.excludeDirs) {
                 this.#excludeDirs = params.excludeDirs;
-            if(params.excludeFiles)
+            }
+
+            if (params.includeFiles) {
+                this.#includeFiles = params.includeFiles;
+            } else if(params.excludeFiles) {
                 this.#excludeFiles = params.excludeFiles;
-            if(params.excludeContracts)
+            }
+
+            if (params.includeContracts) {
+                this.#includeContracts = params.includeContracts;
+            } else if(params.excludeContracts) {
                 this.#excludeContracts = params.excludeContracts;
+            }
         }
 
         let data = undefined; 
@@ -79,9 +96,12 @@ export class ClientPortrait {
 
             this.build(ast)
         }
+        this.#contractTable.forEach((contract, contractName) => {
+            console.log("[LOG] Build contract: ", contractName);
 
-        this.#contractTable.forEach(contract => {
-            console.log("[LOG] Build contract: ", contract.name);
+            if(this.#includeContracts.length !== 0 && !this.#includeContracts.some(item => contractName.toLowerCase().includes(item.toLowerCase()))) return;
+            if(this.#excludeContracts.some(item => contractName.toLowerCase().includes(item.toLowerCase()))) return;
+
             contract.build();
         });
     }    
@@ -231,9 +251,10 @@ export class ClientPortrait {
               
               const func = new Function(functionName, getFunctionSignature(node))
                 .setIsVirtual(node.isVirtual)
+                .setIsConstructor(node.isConstructor)
+                .setIsFallback(node.isFallback)
                 .setIsReceiveEther(node.isReceiveEther)
                 .setIsOverride(node.override !== null)
-                .setIsReceiveEther(node.isReceiveEther)
                 .setStateMutability(node.stateMutability)
                 .setVisibility(node.visibility)
                 
@@ -278,7 +299,7 @@ export class ClientPortrait {
 
     // Public functions:
     public get singltonContracts(){
-        return Array.from(this.#contractTable.values()).filter(contract => contract.isSingleton)
+        return Array.from(this.#contractTable.values()).filter(contract => contract.alreadyBuilt && contract.isSingleton)
     };
 
 }

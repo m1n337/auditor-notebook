@@ -1,3 +1,4 @@
+import { run } from "../client-portrait/display/simple-server.ts";
 import { ClientPortrait, DEFAULT_EXCLUDE_DIR, DEFAULT_EXCLUDE_FILE } from "../index.ts";
 
 interface diffHandlerOptions {
@@ -83,10 +84,14 @@ export const diffHandler = (opts: diffHandlerOptions) => {
     
     if(mode === DIFF_MODE.OVERRIDE){
         const path = opts.path;
-        const c = new ClientPortrait(path as string);
-
-        const contract = opts.contract;
-        formatDiffResult(c, contract);
+        if(opts.contract){
+            run(path as string, opts.contract);
+        } else {
+            const c = new ClientPortrait(path as string);
+    
+            const contract = opts.contract;
+            formatDiffResult(c, contract);
+        }
     } else {
         console.error("Mode not support");
     }

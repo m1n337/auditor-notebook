@@ -4,20 +4,20 @@ import {Function, VisibilityType} from "./function";
 export class Contract extends Base {
     name: string;
 
-    #baseContracts: Contract[];
-    #baseContractsLinearization: Contract[] | undefined;
+    #baseContracts: Contract[] = [];
+    #baseContractsLinearization: Contract[] | undefined = undefined;
     
-    #functionTable: Map<number, Function>;
-    #selfFunctionIds: number[];
-    #selfExternalFunctionIds: number[];
-    #selfInternalFunctionIds: number[];
-    #allFunctionIds: number[];
+    #functionTable: Map<number, Function> = new Map();
+    
+    #selfFunctionIds: number[] = [];
+    #selfExternalFunctionIds: number[] = [];
+    #selfInternalFunctionIds: number[] = [];
 
-    #functionSignaturesTable: Map<string, Function[]>;
+    #functionSignaturesTable: Map<string, Function[]> = new Map();
 
-    #notSingleton!: boolean;
+    #notSingleton: boolean = false;
 
-    #alreadBuilt: boolean;
+    #alreadBuilt: boolean = false;
 
     constructor(
         name: string,
@@ -25,20 +25,6 @@ export class Contract extends Base {
         super();
 
         this.name = name;
-
-        this.#baseContracts = [];
-        this.#baseContractsLinearization = undefined;
-        
-        // Functions:
-        this.#selfFunctionIds = [];
-        this.#selfExternalFunctionIds = [];
-        this.#selfInternalFunctionIds = [];
-        
-        this.#allFunctionIds = [];
-        this.#functionTable = new Map();
-        this.#functionSignaturesTable = new Map();
-
-        this.#alreadBuilt = false;
     }
 
     public setIsNotSingleton() {
@@ -76,7 +62,7 @@ export class Contract extends Base {
         this.#functionTable.set(funcId, func);
 
         this.#selfFunctionIds.push(funcId);
-        this.#allFunctionIds.push(funcId);
+
         if (func.isPublicAccess) {
             this.#selfExternalFunctionIds.push(funcId);
         } else {
@@ -107,8 +93,6 @@ export class Contract extends Base {
             for(const [sig, func] of contract.functionSignaturesTable.entries()){
                 const _funcList = this.#functionSignaturesTable.get(sig);
                 this.#functionSignaturesTable.set(sig, (_funcList || []).concat([...func]));
-                
-                // console.log(`[UPDATE] sig = ${sig} => funcs = ${_funcList?.map(item => `${item.contract.name}:${item.signature}`)} => add ${func.map(item => `${item.contract.name}:${item.signature}`)}`)
             }
 
             if(contract.#alreadBuilt){
@@ -119,6 +103,10 @@ export class Contract extends Base {
         this.#baseContractsLinearization = [this, ...baseContractsLinearization];
 
         this.#alreadBuilt = true;
+    }
+
+    public get alreadyBuilt() {
+        return this.#alreadBuilt;
     }
 }
 

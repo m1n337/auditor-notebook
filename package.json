@@ -1,5 +1,5 @@
 {
-  "name": "autidor-notebook",
+  "name": "audit-notebook",
   "version": "1.0.0",
   "main": "src/index.ts",
   "license": "MIT",
@@ -10,13 +10,12 @@
     "url": "https://github.com/m1n337"
   },
   "bin": {
-    "audotnb": "src/index.ts"
+    "audit-notebook": "./cli.ts"
   },
   "scripts": {
     "antlr": "antlr4ts -visitor antlr/Solidity.g4 -o src/parser",
     "build": "tsc",
-    "start": "ts-node src/index.ts",
-    "display": "ts-node src/client-portrait/display/simple-server.ts"
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^12.0.0",

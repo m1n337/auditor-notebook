@@ -1,6 +1,5 @@
 import { Base } from "./base";
 import { Contract } from "./contract";
-import { Parameter } from "./parameter";
 
 export enum StateMutabilityType {
     NONE,
@@ -23,19 +22,16 @@ export class Function extends Base {
     contract!: Contract;
 
     #isVirtual: Boolean = false;
-    
-    // TODO: is that same with payable?
-    #isReceiveEther: Boolean = false;
     #isOverride: Boolean = false;
+
+    #isConstructor: Boolean = false;
+    #isFallback: Boolean = false;
+    #isReceiveEther: Boolean = false;
+
     #stateMutability: StateMutabilityType = StateMutabilityType.NONE;
     #visibility!: VisibilityType;
 
-    #parameters: Parameter[] = [];
-
-    constructor(
-        name: string,
-        sig: string
-    ) {
+    constructor(name: string, sig: string) {
         super();
 
         this.name = name;
@@ -51,13 +47,23 @@ export class Function extends Base {
         return this;
     }
     
-    public setIsReceiveEther(flg: boolean) {
-        this.#isReceiveEther = flg;
+    public setIsOverride(flg: boolean) {
+        this.#isOverride = flg;
         return this;
     }
 
-    public setIsOverride(flg: boolean) {
-        this.#isOverride = flg;
+    public setIsConstructor(flg: boolean) {
+        this.#isConstructor = flg;
+        return this;
+    }
+
+    public setIsFallback(flg: boolean) {
+        this.#isFallback = flg;
+        return this;
+    }
+
+    public setIsReceiveEther(flg: boolean) {
+        this.#isReceiveEther = flg;
         return this;
     }
 

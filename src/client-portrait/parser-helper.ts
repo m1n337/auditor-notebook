@@ -8,7 +8,9 @@ export const getFunctionName = (f: FunctionDefinition): string => {
         funcName = "constructor";
       } else if (f.isFallback) {
         funcName = "fallback";
-      } else {
+      } else if (f.isReceiveEther) {
+        funcName = "receive";
+      } else{
         throw Error(`not support function name: ${f.name}`);
       }
     }

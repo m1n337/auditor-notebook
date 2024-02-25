@@ -2,7 +2,7 @@ import { Command, program } from "commander";
 import { diffHandler } from "./diff";
 
 program
-    .name("audit")
+    .name("audit-notebook")
     .version("0.0.1");
 
 program
